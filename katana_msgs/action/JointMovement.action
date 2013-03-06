@@ -1,4 +1,6 @@
 #goal definition
-sensor_msgs/JointState jointGoal
+string[] name
+float64[] position
+float64 speed
 ---
 ---
