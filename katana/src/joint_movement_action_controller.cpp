@@ -74,37 +74,40 @@ bool JointMovementActionController::suitableJointGoal(const std::vector<std::str
   return true;
 }
 
-sensor_msgs::JointState JointMovementActionController::adjustJointGoalPositionsToMotorLimits(
-                                                                                             const sensor_msgs::JointState &jointGoal)
+void JointMovementActionController::adjustJointGoalPositionsToMotorLimits(const std::vector<std::string> &name, std::vector<double> &position, double &velocity)
 {
-  sensor_msgs::JointState adjustedJointGoal;
-
-  adjustedJointGoal.name = jointGoal.name;
-  adjustedJointGoal.position = jointGoal.position;
-
-  for (size_t i = 0; i < jointGoal.name.size(); i++)
+  for (size_t i = 0; i < name.size(); i++)
   {
-    ROS_DEBUG("%s - min: %f - max: %f - curr: % f - req: %f", jointGoal.name[i].c_str(), katana_->getMotorLimitMin(jointGoal.name[i]), katana_->getMotorLimitMax(jointGoal.name[i]), katana_->getMotorAngles()[katana_->getJointIndex(jointGoal.name[i])], jointGoal.position[i]);
+    ROS_DEBUG("%s - min: %f - max: %f - curr: % f - req: %f", name[i].c_str(), katana_->getMotorLimitMin(name[i]), katana_->getMotorLimitMax(name[i]), katana_->getMotorAngles()[katana_->getJointIndex(name[i])], position[i]);
   }
 
-  for (size_t i = 0; i < jointGoal.name.size(); i++)
+  for (size_t i = 0; i < name.size(); i++)
   {
 
-    if (jointGoal.position[i] < katana_->getMotorLimitMin(jointGoal.name[i]))
+    if (position[i] < katana_->getMotorLimitMin(name[i]))
     {
-      adjustedJointGoal.position[i] = katana_->getMotorLimitMin(jointGoal.name[i]);
+      position[i] = katana_->getMotorLimitMin(name[i]);
 
-      ROS_INFO("%s - requested JointGoalPosition: %f exceeded MotorLimit: %f  - adjusted JointGoalPosition to MotorLimit", jointGoal.name[i].c_str(), jointGoal.position[i], katana_->getMotorLimitMin(jointGoal.name[i]));
+      ROS_INFO("%s - requested JointGoalPosition: %f exceeded MotorLimit: %f  - adjusted JointGoalPosition to MotorLimit", name[i].c_str(), position[i], katana_->getMotorLimitMin(name[i]));
     }
 
-    if (jointGoal.position[i] > katana_->getMotorLimitMax(jointGoal.name[i]))
+    if (position[i] > katana_->getMotorLimitMax(name[i]))
     {
-      adjustedJointGoal.position[i] = katana_->getMotorLimitMax(jointGoal.name[i]);
-      ROS_INFO("%s - requested JointGoalPosition: %f exceeded MotorLimit: %f  - adjusted JointGoalPosition to MotorLimit", jointGoal.name[i].c_str(), jointGoal.position[i], katana_->getMotorLimitMax(jointGoal.name[i]));
+      position[i] = katana_->getMotorLimitMax(name[i]);
+      ROS_INFO("%s - requested JointGoalPosition: %f exceeded MotorLimit: %f  - adjusted JointGoalPosition to MotorLimit", name[i].c_str(), position[i], katana_->getMotorLimitMax(name[i]));
     }
   }
 
-  return adjustedJointGoal;
+  // standing still is no movement
+  if (velocity <= minVelocity){
+    ROS_INFO("requested movement velocity %f too slow - adjusted to %f", velocity, minVelocity);
+    velocity= minVelocity;
+  }
+  // fix some (reasonable) maximum speed
+  else if (velocity > maxVelocity){
+    ROS_INFO("requested movement velocity %f exceeds maximum %f - adjusted", velocity, maxVelocity);
+    velocity= maxVelocity;
+  }
 }
 
 void JointMovementActionController::executeCB(const JMAS::GoalConstPtr &goal)
@@ -113,13 +116,13 @@ void JointMovementActionController::executeCB(const JMAS::GoalConstPtr &goal)
   // there is no other active goal. in other words, only one instance of executeCB()
   // is ever running at the same time.
 
-  if (!suitableJointGoal(goal->jointGoal.name))
+  if (!suitableJointGoal(goal->name))
   {
     ROS_ERROR("Joints on incoming goal don't match our joints/gripper_joints");
 
-    for (size_t i = 0; i < goal->jointGoal.name.size(); i++)
+    for (size_t i = 0; i < goal->name.size(); i++)
     {
-      ROS_INFO("  incoming joint %d: %s", (int)i, goal->jointGoal.name[i].c_str());
+      ROS_INFO("  incoming joint %d: %s", (int)i, goal->name[i].c_str());
     }
 
     for (size_t i = 0; i < joints_.size(); i++)
@@ -143,13 +146,27 @@ void JointMovementActionController::executeCB(const JMAS::GoalConstPtr &goal)
   }
 
   // adjust all goal positions to match the given motor limits
-  sensor_msgs::JointState adjustedJointGoal = adjustJointGoalPositionsToMotorLimits(goal->jointGoal);
+  std::vector<std::string> name(goal->name);
+  std::vector<double> position(goal->position);
+  double velocity(goal->speed);
+  adjustJointGoalPositionsToMotorLimits(name, position, velocity);
 
-  ROS_INFO("Sending movement to Katana arm...");
+  ROS_INFO("Sending %d joint movements to Katana arm...", name.size());
 
-  for (size_t i = 0; i < adjustedJointGoal.name.size(); i++)
+  // make movement linear in configuration space
+  std::vector<double> angles= katana_->getMotorAngles();
+  std::vector<double> angleDiffs;
+  double maxDiff= 0;
+  for (size_t i = 0; i < name.size(); ++i)
   {
-    if (!katana_->moveJoint(katana_->getJointIndex(adjustedJointGoal.name[i]), adjustedJointGoal.position[i]))
+    angleDiffs.push_back( std::abs( angles[katana_->getJointIndex(name[i])] - position[i] ) );
+    maxDiff = std::max(maxDiff, angleDiffs.at(i));
+  }
+
+  for (size_t i = 0; i < name.size(); i++)
+  {
+    ROS_DEBUG("(motor %d) jid: %d / angle: %f->%f /  diff: %f(max %f) / requested velocity: %f->%f", i, katana_->getJointIndex(name[i]), angles[katana_->getJointIndex(name[i])], position[i], angleDiffs.at(i), maxDiff, velocity, (angleDiffs.at(i)/maxDiff)*velocity);
+    if (!katana_->moveJoint(katana_->getJointIndex(name[i]), position[i], (angleDiffs.at(i)/maxDiff)*velocity))
     {
       ROS_ERROR("Problem while transferring movement to Katana arm. Aborting...");
       action_server_.setAborted();

@@ -33,7 +33,6 @@
 #include <actionlib/client/simple_action_client.h>
 
 #include <katana/AbstractKatana.h>
-#include <sensor_msgs/JointState.h>
 #include <katana_msgs/JointMovementAction.h>
 
 #include <arm_navigation_msgs/JointLimits.h>
@@ -50,13 +49,13 @@ public:
   JointMovementActionController(boost::shared_ptr<AbstractKatana> katana);
   virtual ~JointMovementActionController();
 
+  static const double maxVelocity= 2.5;
+  static const double minVelocity= 0.1;
 private:
   // robot and joint state
   std::vector<std::string> joints_; // controlled joints, same order as expected by the KNI (index 0 = first motor, ...)
   std::vector<std::string> gripper_joints_;
   boost::shared_ptr<AbstractKatana> katana_;
-
-  sensor_msgs::JointState movement_goal_;
 
   // action server
   void executeCB(const JMAS::GoalConstPtr &goal);
@@ -64,7 +63,7 @@ private:
 
   bool suitableJointGoal(const std::vector<std::string>& jointGoalNames);
 
-  sensor_msgs::JointState adjustJointGoalPositionsToMotorLimits(const sensor_msgs::JointState &jointGoal);
+  void adjustJointGoalPositionsToMotorLimits(const std::vector<std::string>& name, std::vector<double>& position, double& speed);
 
 };
 }
