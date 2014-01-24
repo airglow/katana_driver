@@ -209,7 +209,7 @@ boost::shared_ptr<SpecifiedTrajectory> JointTrajectoryActionController::calculat
 {
   boost::shared_ptr<SpecifiedTrajectory> new_traj_ptr;
 
-  bool allPointsHaveVelocities = true;
+  bool allPointsHaveVelocities = false;
 
   // ------ Checks that the incoming segments have the right number of elements,
   //        determines which spline algorithm to use
