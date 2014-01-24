@@ -399,22 +399,31 @@ bool JointTrajectoryActionController::queryStateService(pr2_controllers_msgs::Qu
 }
 
 /**
- * Compares two vectors if they are set-equal (contain same elements in any order)
+ * Checks if all joints in the joint goal match a among joints of the katana.
+ * Copied from the Joint_Movement_Action_Controller.
  */
-static bool setsEqual(const std::vector<std::string> &a, const std::vector<std::string> &b)
+bool JointTrajectoryActionController::suitableJointGoal(const std::vector<std::string> &jointGoalNames)
 {
-  if (a.size() != b.size())
-    return false;
+  for (size_t i = 0; i < jointGoalNames.size(); i++)
+  {
+    bool exists = false;
 
-  for (size_t i = 0; i < a.size(); ++i)
-  {
-    if (count(b.begin(), b.end(), a[i]) != 1)
+    for (size_t j = 0; j < joints_.size(); j++)
+    {
+      if (jointGoalNames[i] == joints_[j])
+        exists = true;
+    }
+
+    for (size_t k = 0; k < gripper_joints_.size(); k++)
+    {
+      if (jointGoalNames[i] == gripper_joints_[k])
+        exists = true;
+    }
+    if (!exists)
+    {
+      ROS_ERROR("joint name %s is not one of our controlled joints", jointGoalNames[i].c_str());
       return false;
-  }
-  for (size_t i = 0; i < b.size(); ++i)
-  {
-    if (count(a.begin(), a.end(), b[i]) != 1)
-      return false;
+    }
   }
 
   return true;
@@ -472,7 +481,7 @@ void JointTrajectoryActionController::executeCBFollow(const FJTAS::GoalConstPtr 
 int JointTrajectoryActionController::executeCommon(const trajectory_msgs::JointTrajectory &trajectory,
                                                    boost::function<bool()> isPreemptRequested)
 {
-  if (!setsEqual(joints_, trajectory.joint_names))
+  if (!suitableJointGoal(trajectory.joint_names))
   {
     ROS_ERROR("Joints on incoming goal don't match our joints");
     for (size_t i = 0; i < trajectory.joint_names.size(); i++)

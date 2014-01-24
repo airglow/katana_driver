@@ -110,6 +110,8 @@ private:
 
   bool allJointsStopped();
 
+  bool suitableJointGoal(const std::vector<std::string>& jointGoalNames);
+
   void removeGripperJointName();
 };
 }
