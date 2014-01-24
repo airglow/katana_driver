@@ -37,6 +37,7 @@
 #include <katana/AbstractKatana.h>
 #include <katana/KNIConverter.h>
 #include <katana/Katana.h>
+#include <katana/spline_functions.h>
 
 namespace katana
 {
