@@ -14,11 +14,16 @@
 #include <sensor_msgs/JointState.h>
 #include <arm_navigation_msgs/FilterJointTrajectory.h>
 #include <trajectory_msgs/JointTrajectory.h>
+#include <control_msgs/GripperCommandAction.h>
+
+#define GRASP 1
+#define RELEASE 2
 
 namespace katana_tutorials
 {
 
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> TrajClient;
+typedef control_msgs::GripperCommandGoal GCG;
 
 class FollowJointTrajectoryClient
 {
@@ -29,10 +34,12 @@ public:
   void startTrajectory(control_msgs::FollowJointTrajectoryGoal goal);
   control_msgs::FollowJointTrajectoryGoal makeArmUpTrajectory();
   actionlib::SimpleClientGoalState getState();
+  bool send_gripper_action(int32_t goal_type);
 
 private:
   ros::NodeHandle nh_;
   TrajClient traj_client_;
+  actionlib::SimpleActionClient<control_msgs::GripperCommandAction> gripper_;
   ros::Subscriber joint_state_sub_;
   std::vector<std::string> joint_names_;
   bool got_joint_state_;

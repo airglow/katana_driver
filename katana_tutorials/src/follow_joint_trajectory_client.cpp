@@ -11,7 +11,7 @@ namespace katana_tutorials
 {
 
 FollowJointTrajectoryClient::FollowJointTrajectoryClient() :
-    traj_client_("/katana_arm_controller/follow_joint_trajectory", true), got_joint_state_(false), spinner_(1)
+    traj_client_("/katana_arm_controller/follow_joint_trajectory", true), gripper_("gripper_grasp_posture_controller", true), got_joint_state_(false), spinner_(1)
 {
   joint_names_.push_back("katana_motor1_pan_joint");
   joint_names_.push_back("katana_motor2_lift_joint");
@@ -26,6 +26,12 @@ FollowJointTrajectoryClient::FollowJointTrajectoryClient() :
   while (!traj_client_.waitForServer(ros::Duration(5.0)))
   {
     ROS_INFO("Waiting for the follow_joint_trajectory server");
+  }
+
+  // wait for action server to come up
+  while (!gripper_.waitForServer(ros::Duration(5.0)))
+  {
+    ROS_INFO("Waiting for the gripper_grasp_posture_controller server");
   }
 }
 
@@ -173,6 +179,53 @@ trajectory_msgs::JointTrajectory FollowJointTrajectoryClient::filterJointTraject
   return res.trajectory;
 }
 
+bool FollowJointTrajectoryClient::send_gripper_action(int goal_type)
+{
+  GCG goal;
+
+  switch (goal_type)
+  {
+    case GRASP:
+      goal.command.position = -0.44;
+      // leave velocity and effort empty
+      break;
+
+    case RELEASE:
+      goal.command.position = 0.3;
+      // leave velocity and effort empty
+      break;
+
+    default:
+      ROS_ERROR("unknown goal code (%d)", goal_type);
+      return false;
+
+  }
+
+
+  bool finished_within_time = false;
+  gripper_.sendGoal(goal);
+  finished_within_time = gripper_.waitForResult(ros::Duration(10.0));
+  if (!finished_within_time)
+  {
+    gripper_.cancelGoal();
+    ROS_WARN("Timed out achieving goal!");
+    return false;
+  }
+  else
+  {
+    actionlib::SimpleClientGoalState state = gripper_.getState();
+    bool success = (state == actionlib::SimpleClientGoalState::SUCCEEDED);
+    if (success)
+      ROS_INFO("Action finished: %s",state.toString().c_str());
+    else
+      ROS_WARN("Action failed: %s",state.toString().c_str());
+
+    return success;
+  }
+
+}
+
+
 } /* namespace katana_tutorials */
 
 int main(int argc, char** argv)
@@ -181,6 +234,10 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "follow_joint_trajectory_client");
 
   katana_tutorials::FollowJointTrajectoryClient arm;
+
+  // close gripper
+  arm.send_gripper_action(GRASP);
+
   // Start the trajectory
   arm.startTrajectory(arm.makeArmUpTrajectory());
   // Wait for trajectory completion
@@ -188,4 +245,7 @@ int main(int argc, char** argv)
   {
     usleep(50000);
   }
+
+  // open gripper
+  arm.send_gripper_action(RELEASE);
 }
