@@ -30,6 +30,21 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+    #TODO DEPENDENCIES geometry_msgs std_msgs
+)
+
+# catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
+# TODO: fill in what other packages will need to use this package
+catkin_package(
+    DEPENDS urdf convex_decomposition ivcon transmission_interface
+    CATKIN_DEPENDS # TODO
+    INCLUDE_DIRS # TODO include
+    LIBRARIES # TODO
+)
+
 #uncomment if you have defined messages
 #add_message_files(
   FILES
@@ -158,16 +173,3 @@ endforeach(it)
 
 add_custom_target(media_files ALL DEPENDS ${katana_gen_files} )
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-    #TODO DEPENDENCIES geometry_msgs std_msgs
-)
-
-# catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
-# TODO: fill in what other packages will need to use this package
-catkin_package(
-    DEPENDS urdf convex_decomposition ivcon transmission_interface
-    CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS # TODO include
-    LIBRARIES # TODO
-)
