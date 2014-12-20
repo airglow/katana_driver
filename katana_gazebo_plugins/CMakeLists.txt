@@ -1,5 +1,17 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+# Catkin User Guide: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/user_guide.html
+# Catkin CMake Standard: http://www.ros.org/doc/groovy/api/catkin/html/user_guide/standards.html
+cmake_minimum_required(VERSION 2.8.3)
+project(katana_gazebo_plugins)
+# Load catkin and all dependencies required for this package
+# TODO: remove all from COMPONENTS that are not catkin packages.
+find_package(catkin REQUIRED COMPONENTS gazebo_ros trajectory_msgs sensor_msgs control_toolbox actionlib katana_msgs control_msgs)
+
+# include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+# CATKIN_MIGRATION: removed during catkin migration
+# cmake_minimum_required(VERSION 2.4.6)
+
+# CATKIN_MIGRATION: removed during catkin migration
+# include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -9,7 +21,9 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-rosbuild_init()
+
+# CATKIN_MIGRATION: removed during catkin migration
+# rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -26,24 +40,49 @@ endif()
 include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
-rosbuild_add_library(gazebo_ros_katana_gripper src/gazebo_ros_katana_gripper.cpp src/katana_gripper_grasp_controller.cpp src/katana_gripper_joint_trajectory_controller.cpp src/gazebo_ros_katana_gripper_action_interface.cpp)
+add_library(gazebo_ros_katana_gripper src/gazebo_ros_katana_gripper.cpp src/katana_gripper_grasp_controller.cpp src/katana_gripper_joint_trajectory_controller.cpp src/gazebo_ros_katana_gripper_action_interface.cpp)
 target_link_libraries(gazebo_ros_katana_gripper ${GAZEBO_LIBRARIES})
 
 
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+#add_message_files(
+  FILES
+  # TODO: List your msg files here
+)
 #uncomment if you have defined services
-#rosbuild_gensrv()
+#add_service_files(
+  FILES
+  # TODO: List your msg files here
+)
 
 #common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
+#
+# CATKIN_MIGRATION: removed during catkin migration
+# rosbuild_add_boost_directories()
+#find_package(Boost REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+#add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_boost_directories()
-rosbuild_add_executable(test_gripper_joint_trajectory src/test_gripper_joint_trajectory.cpp)
+
+# CATKIN_MIGRATION: removed during catkin migration
+# rosbuild_add_boost_directories()
+add_executable(test_gripper_joint_trajectory src/test_gripper_joint_trajectory.cpp)
 target_link_libraries(test_gripper_joint_trajectory ${GAZEBO_LIBRARIES})
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+    #TODO DEPENDENCIES geometry_msgs std_msgs
+)
+
+# catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
+# TODO: fill in what other packages will need to use this package
+catkin_package(
+    DEPENDS gazebo_ros trajectory_msgs sensor_msgs control_toolbox actionlib katana_msgs control_msgs
+    CATKIN_DEPENDS # TODO
+    INCLUDE_DIRS # TODO include
+    LIBRARIES # TODO
+)
