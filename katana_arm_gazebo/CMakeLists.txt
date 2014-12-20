@@ -41,14 +41,14 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 #uncomment if you have defined messages
 #add_message_files(
-  FILES
-  # TODO: List your msg files here
-)
-#uncomment if you have defined services
-#add_service_files(
-  FILES
-  # TODO: List your msg files here
-)
+  #FILES
+  ## TODO: List your msg files here
+#)
+##uncomment if you have defined services
+##add_service_files(
+  #FILES
+  ## TODO: List your msg files here
+#)
 
 #common commands for building c++ executables and libraries
 #add_library(${PROJECT_NAME} src/example.cpp)
@@ -57,8 +57,8 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 # CATKIN_MIGRATION: removed during catkin migration
 # rosbuild_add_boost_directories()
 #find_package(Boost REQUIRED COMPONENTS thread)
-include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+#include_directories(${Boost_INCLUDE_DIRS})
+#target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 #add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 

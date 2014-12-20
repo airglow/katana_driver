@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(katana)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS roscpp roslib kni geometry_msgs std_srvs sensor_msgs actionlib control_msgs trajectory_msgs urdf tf katana_msgs moveit_msgs armadillo)
+find_package(catkin REQUIRED COMPONENTS roscpp roslib kni geometry_msgs std_srvs sensor_msgs actionlib control_msgs trajectory_msgs urdf tf katana_msgs moveit_msgs )
 
 # include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 # CATKIN_MIGRATION: removed during catkin migration
