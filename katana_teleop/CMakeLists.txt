@@ -54,6 +54,7 @@ find_package(catkin REQUIRED COMPONENTS control_msgs sensor_msgs roscpp katana_m
 #target_link_libraries(example ${PROJECT_NAME})
 
 add_executable(katana_teleop_key src/katana_teleop_key.cpp) 
+target_link_libraries(katana_teleop_key ${catkin_LIBRARIES})
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
     #TODO DEPENDENCIES geometry_msgs std_msgs

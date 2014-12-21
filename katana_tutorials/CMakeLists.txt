@@ -54,6 +54,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp actionlib trajectory_msgs control
 #target_link_libraries(example ${PROJECT_NAME})
 add_executable(follow_joint_trajectory_client src/follow_joint_trajectory_client.cpp)
 add_executable(pr2_joint_trajectory_client src/pr2_joint_trajectory_client.cpp)
+
+target_link_libraries(follow_joint_trajectory_client ${catkin_LIBRARIES})
+target_link_libraries(pr2_joint_trajectory_client ${catkin_LIBRARIES})
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
     #TODO DEPENDENCIES geometry_msgs std_msgs

@@ -67,7 +67,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 # rosbuild_add_boost_directories()
 
 add_executable(min_max_trajectory src/min_max_trajectory.cpp)
-target_link_libraries(min_max_trajectory ${GAZEBO_LIBRARIES})
+target_link_libraries(min_max_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
     #TODO DEPENDENCIES geometry_msgs std_msgs

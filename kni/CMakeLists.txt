@@ -99,6 +99,6 @@ endif(_make_failed)
 catkin_package(
     DEPENDS # TODO add dependencies
     CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS # TODO include
-    LIBRARIES # TODO
+	INCLUDE_DIRS KNI_4.3.0/include
+	LIBRARIES Kinematics KNI_LM KNI_InvKin KNIBase
 )

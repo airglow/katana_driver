@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(katana_msgs)
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
-find_package(catkin REQUIRED COMPONENTS sensor_msgs actionlib_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS sensor_msgs actionlib_msgs std_msgs actionlib)
 
 # include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 # CATKIN_MIGRATION: removed during catkin migration
@@ -43,8 +43,13 @@ add_message_files(
 )
 
 
+add_action_files(
+	FILES 
+	JointMovement.action
+)
+
 generate_messages(
-    DEPENDENCIES geometry_msgs std_msgs
+    DEPENDENCIES geometry_msgs std_msgs actionlib_msgs sensor_msgs
 )
 
 

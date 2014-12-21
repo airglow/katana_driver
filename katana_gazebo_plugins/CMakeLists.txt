@@ -37,7 +37,7 @@ if(PKG_CONFIG_FOUND)
    pkg_check_modules(GAZEBO gazebo)
 endif()
 
-include_directories(${GAZEBO_INCLUDE_DIRS})
+include_directories(${GAZEBO_INCLUDE_DIRS} include)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 add_library(gazebo_ros_katana_gripper src/gazebo_ros_katana_gripper.cpp src/katana_gripper_grasp_controller.cpp src/katana_gripper_joint_trajectory_controller.cpp src/gazebo_ros_katana_gripper_action_interface.cpp)
@@ -72,7 +72,7 @@ target_link_libraries(gazebo_ros_katana_gripper ${GAZEBO_LIBRARIES})
 # CATKIN_MIGRATION: removed during catkin migration
 # rosbuild_add_boost_directories()
 add_executable(test_gripper_joint_trajectory src/test_gripper_joint_trajectory.cpp)
-target_link_libraries(test_gripper_joint_trajectory ${GAZEBO_LIBRARIES})
+target_link_libraries(test_gripper_joint_trajectory ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
     #TODO DEPENDENCIES geometry_msgs std_msgs
@@ -83,6 +83,6 @@ generate_messages(
 catkin_package(
     DEPENDS gazebo_ros trajectory_msgs sensor_msgs control_toolbox actionlib katana_msgs control_msgs
     CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS # TODO include
+    INCLUDE_DIRS include
     LIBRARIES # TODO
 )

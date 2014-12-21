@@ -6,7 +6,9 @@ project(katana)
 # TODO: remove all from COMPONENTS that are not catkin packages.
 find_package(catkin REQUIRED COMPONENTS roscpp roslib kni geometry_msgs std_srvs sensor_msgs actionlib control_msgs trajectory_msgs urdf tf katana_msgs moveit_msgs )
 
-# include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS}
+	 KNI_4.3.0
+	 )
 # CATKIN_MIGRATION: removed during catkin migration
 # cmake_minimum_required(VERSION 2.4.6)
 
@@ -64,9 +66,11 @@ generate_messages(
 catkin_package(
     DEPENDS roscpp roslib kni geometry_msgs std_srvs sensor_msgs actionlib control_msgs trajectory_msgs urdf tf katana_msgs moveit_msgs armadillo
     CATKIN_DEPENDS # TODO
-    INCLUDE_DIRS # TODO include
+    INCLUDE_DIRS include
     LIBRARIES # TODO
 )
 
 add_executable(katana src/KatanaNode.cpp src/AbstractKatana.cpp src/Katana.cpp src/Katana300.cpp src/SimulatedKatana.cpp src/JointStatePublisher.cpp src/joint_trajectory_action_controller.cpp src/joint_movement_action_controller.cpp src/KNIConverter.cpp src/spline_functions.cpp src/katana_gripper_grasp_controller.cpp)
 add_executable(katana_arm_kinematics src/KNIConverter.cpp src/KNIKinematics.cpp)
+target_link_libraries(katana ${catkin_LIBRARIES})
+target_link_libraries(katana_arm_kinematics ${catkin_LIBRARIES})
